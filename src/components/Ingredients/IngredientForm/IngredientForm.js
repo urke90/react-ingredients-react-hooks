@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 import Card from "../../UI/Card/Card";
 import "./IngredientForm.css";
@@ -6,7 +7,7 @@ import "./IngredientForm.css";
 // 1. use hooks only inside functional components or other custom hooks
 // 2. use hooks inside root of the function ( can't use inside nested function or some if statements )
 // useState hooks == state ={}, for each input create separate hooks
-const IngredientForm = React.memo((props) => {
+const IngredientForm = React.memo(({ addIngredientsHandler }) => {
   // useState always returns 2 elements
   // 1. arr[0] === value we assign ine useState()
   // 2. arr[1] === function to update the state
@@ -15,7 +16,7 @@ const IngredientForm = React.memo((props) => {
 
   const submitHandler = (event) => {
     event.preventDefault();
-    // ...
+    addIngredientsHandler({ title, amount, id: uuidv4() });
   };
 
   return (
