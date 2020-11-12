@@ -3,14 +3,20 @@ import React, { useState } from "react";
 import IngredientForm from "./IngredientForm/IngredientForm";
 import Search from "./Search/Search";
 import IngredientList from "./IngredientList/IngredientList";
+import axios from "../Api/ingredientApi";
 
 // manage ingredients with useState()
 const Ingredients = () => {
   const [ingredients, setIngredients] = useState([]);
 
   const addIngredientsHandler = (ingredint) => {
-    console.log("ingredient in Ingredient.js", ingredint);
-    setIngredients((prevIngredients) => [...prevIngredients, ingredint]);
+    try {
+      const response = axios.post("ingredients.json", ingredint);
+      console.log("response", response);
+      setIngredients((prevIngredients) => [...prevIngredients, ingredint]);
+    } catch (error) {
+      console.log("error adding ingredients", error);
+    }
   };
 
   const removeIngredientHandler = (id) => {
