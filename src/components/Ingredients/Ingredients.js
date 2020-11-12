@@ -14,9 +14,11 @@ const Ingredients = () => {
   };
 
   const removeIngredientHandler = (id) => {
-    // 1. first way
+    // 1st approach
     // const newIngredients = [...ingredients].filter((ing) => ing.id !== id);
     // setIngredients(newIngredients);
+
+    // 2nd approach
     setIngredients((prevIngredients) =>
       prevIngredients.filter((ing) => ing.id !== id)
     );
