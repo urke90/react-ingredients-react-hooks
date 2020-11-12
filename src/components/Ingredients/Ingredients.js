@@ -14,7 +14,12 @@ const Ingredients = () => {
   };
 
   const removeIngredientHandler = (id) => {
-    console.log("removeIngHandler");
+    // 1. first way
+    // const newIngredients = [...ingredients].filter((ing) => ing.id !== id);
+    // setIngredients(newIngredients);
+    setIngredients((prevIngredients) =>
+      prevIngredients.filter((ing) => ing.id !== id)
+    );
   };
 
   console.log("ingredientsssssssss in ingredients,js", ingredients);
