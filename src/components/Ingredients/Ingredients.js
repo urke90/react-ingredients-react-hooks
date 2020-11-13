@@ -4,18 +4,24 @@ import IngredientForm from "./IngredientForm/IngredientForm";
 import Search from "./Search/Search";
 import IngredientList from "./IngredientList/IngredientList";
 import axios from "../Api/ingredientApi";
+import Loader from "../UI/Loader/Loader";
 
 // manage ingredients with useState()
 const Ingredients = () => {
   const [ingredients, setIngredients] = useState([]);
+  const [loader, setLoader] = useState(false);
+  console.log("loader", loader);
 
-  const addIngredientsHandler = (ingredint) => {
+  const addIngredientsHandler = async (ingredint) => {
     try {
-      const response = axios.post("ingredients.json", ingredint);
+      setLoader(true);
+      const response = await axios.post("ingredients.json", ingredint);
       console.log("response", response);
       setIngredients((prevIngredients) => [...prevIngredients, ingredint]);
+      setLoader(false);
     } catch (error) {
       console.log("error adding ingredients", error);
+      setLoader(false);
     }
   };
 
@@ -30,22 +36,26 @@ const Ingredients = () => {
     );
   };
 
-  console.log("ingredientsssssssss in ingredients,js", ingredients);
+  let ingredientList = null;
+
+  if (ingredients.length) {
+    ingredientList = (
+      <IngredientList
+        ingredients={ingredients}
+        onRemoveItem={removeIngredientHandler}
+      />
+    );
+  }
+
+  ingredientList = loader ? <Loader /> : ingredientList;
 
   return (
     <div className="App">
       <IngredientForm addIngredientsHandler={addIngredientsHandler} />
 
-      <section>
+      <section style={{ textAlign: "center" }}>
         <Search />
-        {ingredients.length > 0 ? (
-          <IngredientList
-            ingredients={ingredients}
-            onRemoveItem={removeIngredientHandler}
-          />
-        ) : (
-          <p style={{ textAlign: "center" }}>Please add new ingredient!</p>
-        )}
+        {ingredients.length ? ingredientList : <p>Plase add new Ingredient.</p>}
       </section>
     </div>
   );
