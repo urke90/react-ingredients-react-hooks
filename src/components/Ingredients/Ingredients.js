@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import IngredientForm from "./IngredientForm/IngredientForm";
 import Search from "./Search/Search";
@@ -9,15 +9,14 @@ import Loader from "../UI/Loader/Loader";
 // manage ingredients with useState()
 const Ingredients = () => {
   const [ingredients, setIngredients] = useState([]);
-  const [loader, setLoader] = useState(false);
-  console.log("loader", loader);
+  const [isLoading, setLoader] = useState(false);
 
-  const addIngredientsHandler = async (ingredint) => {
+  // add igredients to database and on UI
+  const addIngredientsHandler = async (ingredient) => {
     try {
       setLoader(true);
-      const response = await axios.post("ingredients.json", ingredint);
-      console.log("response", response);
-      setIngredients((prevIngredients) => [...prevIngredients, ingredint]);
+      await axios.post("ingredients.json", ingredient);
+      setIngredients((prevIngredients) => [...prevIngredients, ingredient]);
       setLoader(false);
     } catch (error) {
       console.log("error adding ingredients", error);
@@ -36,10 +35,12 @@ const Ingredients = () => {
     );
   };
 
-  let ingredientList = null;
 
+  let ingredientsList = null;
+
+  // render ingredients only if there are ingredients
   if (ingredients.length) {
-    ingredientList = (
+    ingredientsList = (
       <IngredientList
         ingredients={ingredients}
         onRemoveItem={removeIngredientHandler}
@@ -47,7 +48,8 @@ const Ingredients = () => {
     );
   }
 
-  ingredientList = loader ? <Loader /> : ingredientList;
+  // switch from igredientsList comp to loader if data is saved in firebase
+  ingredientsList = isLoading ? <Loader /> : ingredientsList;
 
   return (
     <div className="App">
@@ -55,7 +57,11 @@ const Ingredients = () => {
 
       <section style={{ textAlign: "center" }}>
         <Search />
-        {ingredients.length ? ingredientList : <p>Plase add new Ingredient.</p>}
+        {ingredients.length ? (
+          ingredientsList
+        ) : (
+            <p>Plase add new Ingredient.</p>
+          )}
       </section>
     </div>
   );
