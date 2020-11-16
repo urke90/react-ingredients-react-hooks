@@ -4,23 +4,50 @@ import IngredientForm from "./IngredientForm/IngredientForm";
 import Search from "./Search/Search";
 import IngredientList from "./IngredientList/IngredientList";
 import axios from "../Api/ingredientApi";
+import axiosCors from '../Api/corsIngredientsApi';
 import Loader from "../UI/Loader/Loader";
 
 // manage ingredients with useState()
 const Ingredients = () => {
   const [ingredients, setIngredients] = useState([]);
-  const [isLoading, setLoader] = useState(false);
+  const [isLoading, setisLoading] = useState(false);
+
+  useEffect(() => {
+    const getIngredients = async () => {
+      setisLoading(true);
+
+      try {
+        const response = await axios.get('/ingredients.json');
+        const ingredientsData = response.data;
+        const transformedIngredients = [];
+
+        for (let key in ingredientsData) {
+          transformedIngredients.push(ingredientsData[key]);
+        }
+
+        setIngredients(transformedIngredients);
+        setisLoading(false);
+      } catch (error) {
+        console.log('error fetching ingredients', error);
+        setisLoading(false);
+      }
+
+    };
+
+    getIngredients();
+  }, []);
 
   // add igredients to database and on UI
   const addIngredientsHandler = async (ingredient) => {
     try {
-      setLoader(true);
+      setisLoading(true);
       await axios.post("ingredients.json", ingredient);
       setIngredients((prevIngredients) => [...prevIngredients, ingredient]);
-      setLoader(false);
+      console.log('ingredients', ingredients);
+      setisLoading(false);
     } catch (error) {
       console.log("error adding ingredients", error);
-      setLoader(false);
+      setisLoading(false);
     }
   };
 
@@ -35,6 +62,7 @@ const Ingredients = () => {
     );
   };
 
+  console.log('ingredients', ingredients);
 
   let ingredientsList = null;
 
