@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 import IngredientForm from "./IngredientForm/IngredientForm";
 import Search from "./Search/Search";
 import IngredientList from "./IngredientList/IngredientList";
 import axios from "../Api/ingredientApi";
-import axiosCors from '../Api/corsIngredientsApi';
+// import axiosCors from '../Api/corsIngredientsApi';
 import Loader from "../UI/Loader/Loader";
 
 // manage ingredients with useState()
@@ -13,28 +13,12 @@ const Ingredients = () => {
   const [isLoading, setisLoading] = useState(false);
 
   useEffect(() => {
-    const getIngredients = async () => {
-      setisLoading(true);
+    console.log('RENDERING INGREDIENTS', ingredients);
+  }, [ingredients]);
 
-      try {
-        const response = await axios.get('/ingredients.json');
-        const ingredientsData = response.data;
-        const transformedIngredients = [];
-
-        for (let key in ingredientsData) {
-          transformedIngredients.push(ingredientsData[key]);
-        }
-
-        setIngredients(transformedIngredients);
-        setisLoading(false);
-      } catch (error) {
-        console.log('error fetching ingredients', error);
-        setisLoading(false);
-      }
-
-    };
-
-    getIngredients();
+  // filter ingredients based on query
+  const searchIngredientHandler = useCallback((filetredIngredient) => {
+    setIngredients(filetredIngredient);
   }, []);
 
   // add igredients to database and on UI
@@ -51,6 +35,7 @@ const Ingredients = () => {
     }
   };
 
+  // remove ingredients from database and UI
   const removeIngredientHandler = (id) => {
     // 1st approach
     // const newIngredients = [...ingredients].filter((ing) => ing.id !== id);
@@ -62,7 +47,6 @@ const Ingredients = () => {
     );
   };
 
-  console.log('ingredients', ingredients);
 
   let ingredientsList = null;
 
@@ -84,7 +68,7 @@ const Ingredients = () => {
       <IngredientForm addIngredientsHandler={addIngredientsHandler} />
 
       <section style={{ textAlign: "center" }}>
-        <Search />
+        <Search onSearchIngredient={searchIngredientHandler} />
         {ingredients.length ? (
           ingredientsList
         ) : (
