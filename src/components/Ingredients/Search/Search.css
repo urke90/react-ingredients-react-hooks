@@ -11,6 +11,11 @@
   flex-direction: column;
 }
 
+.search-input form {
+  display: flex;
+  justify-content: space-around;
+}
+
 .search-input input {
   font: inherit;
   border: 1px solid #ccc;

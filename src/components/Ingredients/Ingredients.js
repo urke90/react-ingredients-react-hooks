@@ -13,7 +13,26 @@ const Ingredients = () => {
   const [isLoading, setisLoading] = useState(false);
 
   useEffect(() => {
-    console.log('RENDERING INGREDIENTS', ingredients);
+    const fetchInitIngredients = async () => {
+      try {
+        const response = await axios.get(`/ingredients.json`);
+        const ingredientsData = response.data;
+        const transformedIngredients = [];
+
+        for (let key in ingredientsData) {
+          transformedIngredients.push(ingredientsData[key]);
+        }
+
+        setIngredients(transformedIngredients);
+      } catch (error) {
+        console.log("error", error);
+      }
+    };
+    fetchInitIngredients();
+  }, []);
+
+  useEffect(() => {
+    console.log("RENDERING INGREDIENTS", ingredients);
   }, [ingredients]);
 
   // filter ingredients based on query
@@ -27,7 +46,7 @@ const Ingredients = () => {
       setisLoading(true);
       await axios.post("ingredients.json", ingredient);
       setIngredients((prevIngredients) => [...prevIngredients, ingredient]);
-      console.log('ingredients', ingredients);
+      console.log("ingredients", ingredients);
       setisLoading(false);
     } catch (error) {
       console.log("error adding ingredients", error);
@@ -46,7 +65,6 @@ const Ingredients = () => {
       prevIngredients.filter((ing) => ing.id !== id)
     );
   };
-
 
   let ingredientsList = null;
 
@@ -72,8 +90,8 @@ const Ingredients = () => {
         {ingredients.length ? (
           ingredientsList
         ) : (
-            <p>Plase add new Ingredient.</p>
-          )}
+          <p>Plase add new Ingredient.</p>
+        )}
       </section>
     </div>
   );
