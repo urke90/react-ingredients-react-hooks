@@ -4,6 +4,7 @@ import IngredientForm from "./IngredientForm/IngredientForm";
 import Search from "./Search/Search";
 import IngredientList from "./IngredientList/IngredientList";
 import axios from "../Api/ingredientApi";
+import corsAxios from "../Api/corsIngredientsApi";
 import Loader from "../UI/Loader/Loader";
 
 // manage ingredients with useState()
@@ -25,7 +26,6 @@ const Ingredients = () => {
             amount: ingredientsData[key]["amount"],
           });
         }
-
         console.log("transformedIngredients", transformedIngredients);
         setIngredients(transformedIngredients);
       } catch (error) {
@@ -49,9 +49,12 @@ const Ingredients = () => {
   const addIngredientsHandler = async (ingredient) => {
     try {
       setisLoading(true);
-      await axios.post("ingredients.json", ingredient);
-      setIngredients((prevIngredients) => [...prevIngredients, ingredient]);
-      console.log("ingredients", ingredients);
+      const response = await corsAxios.post("ingredients.json", ingredient);
+
+      setIngredients((prevIngredients) => [
+        ...prevIngredients,
+        { id: response.data.name, ...ingredient },
+      ]);
       setisLoading(false);
     } catch (error) {
       console.log("error adding ingredients", error);
@@ -60,15 +63,20 @@ const Ingredients = () => {
   };
 
   // remove ingredients from database and UI
-  const removeIngredientHandler = (id) => {
+  const removeIngredientHandler = async (id) => {
     // 1st approach
     // const newIngredients = [...ingredients].filter((ing) => ing.id !== id);
     // setIngredients(newIngredients);
 
-    // 2nd approach
-    setIngredients((prevIngredients) =>
-      prevIngredients.filter((ing) => ing.id !== id)
-    );
+    try {
+      await axios.delete(`ingredients/${id}.json`);
+      // 2nd approach
+      setIngredients((prevIngredients) =>
+        prevIngredients.filter((ing) => ing.id !== id)
+      );
+    } catch (error) {
+      console.log("error deleting ingredient", error);
+    }
   };
 
   let ingredientsList = null;
