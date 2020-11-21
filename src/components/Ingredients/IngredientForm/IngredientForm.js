@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { v4 as uuidv4 } from "uuid";
+// import { v4 as uuidv4 } from "uuid";
 
 import Card from "../../UI/Card/Card";
 import "./IngredientForm.css";
@@ -16,7 +16,7 @@ const IngredientForm = React.memo(({ addIngredientsHandler }) => {
 
   const submitHandler = (event) => {
     event.preventDefault();
-    addIngredientsHandler({ title, amount, id: uuidv4() });
+    addIngredientsHandler({ title, amount });
   };
 
   return (

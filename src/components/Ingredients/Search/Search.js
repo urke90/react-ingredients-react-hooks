@@ -1,21 +1,14 @@
 import React, { useState, useEffect } from "react";
 
 import Card from "../../UI/Card/Card";
-// import axios from '../../Api/corsIngredientsApi';
 import axios from "../../Api/ingredientApi";
 
 import "./Search.css";
 
-const Search = React.memo((props) => {
-  const { onSearchIngredient } = props;
+const Search = React.memo(({ onSearchIngredient }) => {
   const [searchValue, setSearchValue] = useState("");
 
-  useEffect(() => {
-    const getFilteredIngredients = async () => {};
-
-    getFilteredIngredients();
-  }, [searchValue, onSearchIngredient]);
-
+  // get ingredient by title from database when user submits form
   const searchIngreientHandler = async (event) => {
     event.preventDefault();
     try {

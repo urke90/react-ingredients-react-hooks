@@ -4,7 +4,6 @@ import IngredientForm from "./IngredientForm/IngredientForm";
 import Search from "./Search/Search";
 import IngredientList from "./IngredientList/IngredientList";
 import axios from "../Api/ingredientApi";
-// import axiosCors from '../Api/corsIngredientsApi';
 import Loader from "../UI/Loader/Loader";
 
 // manage ingredients with useState()
@@ -12,28 +11,34 @@ const Ingredients = () => {
   const [ingredients, setIngredients] = useState([]);
   const [isLoading, setisLoading] = useState(false);
 
+  // fetching init ingredients from database
   useEffect(() => {
     const fetchInitIngredients = async () => {
       try {
         const response = await axios.get(`/ingredients.json`);
         const ingredientsData = response.data;
         const transformedIngredients = [];
-
         for (let key in ingredientsData) {
-          transformedIngredients.push(ingredientsData[key]);
+          transformedIngredients.push({
+            id: key,
+            title: ingredientsData[key]["title"],
+            amount: ingredientsData[key]["amount"],
+          });
         }
 
+        console.log("transformedIngredients", transformedIngredients);
         setIngredients(transformedIngredients);
       } catch (error) {
         console.log("error", error);
       }
     };
+
     fetchInitIngredients();
   }, []);
 
-  useEffect(() => {
-    console.log("RENDERING INGREDIENTS", ingredients);
-  }, [ingredients]);
+  // useEffect(() => {
+  //   console.log("RENDERING INGREDIENTS", ingredients);
+  // }, [ingredients]);
 
   // filter ingredients based on query
   const searchIngredientHandler = useCallback((filetredIngredient) => {
