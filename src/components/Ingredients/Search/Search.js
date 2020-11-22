@@ -20,7 +20,11 @@ const Search = React.memo(({ onSearchIngredient }) => {
       const transformedIngredients = [];
 
       for (let key in ingredientsData) {
-        transformedIngredients.push(ingredientsData[key]);
+        transformedIngredients.push({
+          id: key,
+          amount: ingredientsData[key]["amount"],
+          title: ingredientsData[key]["title"],
+        });
       }
 
       onSearchIngredient(transformedIngredients);
@@ -34,7 +38,7 @@ const Search = React.memo(({ onSearchIngredient }) => {
       <Card>
         <div className="search-input">
           <label>Filter by Title</label>
-          <form onSubmit={(event) => searchIngreientHandler(event)}>
+          <form onSubmit={searchIngreientHandler}>
             <input
               name="ingredients_search"
               type="text"
