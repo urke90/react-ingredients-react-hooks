@@ -5,20 +5,23 @@ import Search from "./Search/Search";
 import IngredientList from "./IngredientList/IngredientList";
 import axios from "../Api/ingredientApi";
 import corsAxios from "../Api/corsIngredientsApi";
-import Loader from "../UI/Loader/Loader";
+import ErrorModal from "../UI/ErrorModal/ErrorModal";
 
 // manage ingredients with useState()
 const Ingredients = () => {
   const [ingredients, setIngredients] = useState([]);
   const [isLoading, setisLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState();
 
   // fetching init ingredients from database
   useEffect(() => {
     const fetchInitIngredients = async () => {
       try {
+        setisLoading(true);
         const response = await axios.get(`/ingredients.json`);
         const ingredientsData = response.data;
         const transformedIngredients = [];
+
         for (let key in ingredientsData) {
           transformedIngredients.push({
             id: key,
@@ -26,10 +29,13 @@ const Ingredients = () => {
             amount: ingredientsData[key]["amount"],
           });
         }
-        console.log("transformedIngredients", transformedIngredients);
+
         setIngredients(transformedIngredients);
+        setisLoading(false);
       } catch (error) {
-        console.log("error", error);
+        console.log("error", error.message);
+        setErrorMessage(error.message);
+        setisLoading(false);
       }
     };
 
@@ -58,6 +64,7 @@ const Ingredients = () => {
       setisLoading(false);
     } catch (error) {
       console.log("error adding ingredients", error);
+      setErrorMessage(error.message);
       setisLoading(false);
     }
   };
@@ -69,15 +76,21 @@ const Ingredients = () => {
     // setIngredients(newIngredients);
 
     try {
+      setisLoading(true);
       await axios.delete(`ingredients/${id}.json`);
       // 2nd approach
       setIngredients((prevIngredients) =>
         prevIngredients.filter((ing) => ing.id !== id)
       );
+      setisLoading(false);
     } catch (error) {
       console.log("error deleting ingredient", error);
+      setErrorMessage(error.message);
+      setisLoading(false);
     }
   };
+
+  const clearErrorMessageHandler = () => setErrorMessage(null);
 
   let ingredientsList = null;
 
@@ -91,20 +104,22 @@ const Ingredients = () => {
     );
   }
 
-  // switch from igredientsList comp to loader if data is saved in firebase
-  ingredientsList = isLoading ? <Loader /> : ingredientsList;
-
   return (
     <div className="App">
-      <IngredientForm addIngredientsHandler={addIngredientsHandler} />
+      {errorMessage && (
+        <ErrorModal onClose={clearErrorMessageHandler}>
+          {errorMessage}
+        </ErrorModal>
+      )}
+      <IngredientForm
+        addIngredientsHandler={addIngredientsHandler}
+        loading={isLoading}
+      />
 
       <section style={{ textAlign: "center" }}>
         <Search onSearchIngredient={searchIngredientHandler} />
-        {ingredients.length ? (
-          ingredientsList
-        ) : (
-          <p>Plase add new Ingredient.</p>
-        )}
+
+        {ingredientsList || <p>Plase add new Ingredient.</p>}
       </section>
     </div>
   );

@@ -2,12 +2,13 @@ import React, { useState } from "react";
 // import { v4 as uuidv4 } from "uuid";
 
 import Card from "../../UI/Card/Card";
+import Loader from "../../UI/Loader/Loader";
 import "./IngredientForm.css";
 
 // 1. use hooks only inside functional components or other custom hooks
 // 2. use hooks inside root of the function ( can't use inside nested function or some if statements )
 // useState hooks == state ={}, for each input create separate hooks
-const IngredientForm = React.memo(({ addIngredientsHandler }) => {
+const IngredientForm = React.memo(({ addIngredientsHandler, loading }) => {
   // useState always returns 2 elements
   // 1. arr[0] === value we assign ine useState()
   // 2. arr[1] === function to update the state
@@ -43,6 +44,7 @@ const IngredientForm = React.memo(({ addIngredientsHandler }) => {
           </div>
           <div className="ingredient-form__actions">
             <button type="submit">Add Ingredient</button>
+            {loading && <Loader />}
           </div>
         </form>
       </Card>
