@@ -1,4 +1,4 @@
-import React, { useState, useReducer, useEffect, useCallback } from "react";
+import React, { useReducer, useEffect, useCallback } from "react";
 
 import IngredientForm from "./IngredientForm/IngredientForm";
 import Search from "./Search/Search";
@@ -15,10 +15,25 @@ const ingredientsReducer = (state, action) => {
       return action.ingredients;
     case "ADD":
       return [...state, action.ingredient];
-    case "DELETE":
+    case "REMOVE":
       return state.filter(
         (ingredient) => ingredient.id !== action.ingredientId
       );
+    default:
+      return state;
+  }
+};
+
+const httpReducer = (state, action) => {
+  switch (action.type) {
+    case "SEND":
+      return { ...state, isLoading: true };
+    case "RESPONSE":
+      return { ...state, isLoading: false };
+    case "ERROR":
+      return { ...state, error: action.errorMessage };
+    case "CLEAR":
+      return { ...state, error: null };
     default:
       return state;
   }
@@ -28,15 +43,21 @@ const ingredientsReducer = (state, action) => {
 const Ingredients = () => {
   // approach with setState()
   // const [ingredients, setIngredients] = useState([]);
-  const [ingredients, dispatch] = useReducer(ingredientsReducer, []);
-  const [isLoading, setisLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState();
+  // const [isLoading, setisLoading] = useState(false);
+  // const [errorMessage, setErrorMessage] = useState();
+
+  const [ingredients, dispatchIngredients] = useReducer(ingredientsReducer, []);
+  const [httpState, dispatchHttp] = useReducer(httpReducer, {
+    isLoading: false,
+    error: null,
+  });
 
   // fetching init ingredients from database
   useEffect(() => {
     const fetchInitIngredients = async () => {
       try {
-        setisLoading(true);
+        dispatchHttp({ type: "SEND" });
+        // setisLoading(true);
         const response = await axios.get(`/ingredients.json`);
         const ingredientsData = response.data;
         const transformedIngredients = [];
@@ -51,12 +72,19 @@ const Ingredients = () => {
         // using setState()
         // setIngredients(transformedIngredients);
 
-        dispatch({ type: "SET", ingredients: transformedIngredients });
-        setisLoading(false);
+        dispatchIngredients({
+          type: "SET",
+          ingredients: transformedIngredients,
+        });
+
+        dispatchHttp({ type: "RESPONSE" });
+        // setisLoading(false);
       } catch (error) {
         console.log("error", error.message);
-        setErrorMessage(error.message);
-        setisLoading(false);
+
+        dispatchHttp({ type: "ERROR", errorMessage: error.message });
+        // setErrorMessage(error.message);
+        // setisLoading(false);
       }
     };
 
@@ -70,7 +98,8 @@ const Ingredients = () => {
   // add igredients to database and on UI
   const addIngredientsHandler = async (ingredient) => {
     try {
-      setisLoading(true);
+      dispatchHttp({ type: "SEND" });
+      // setisLoading(true);
       const response = await corsAxios.post("ingredients.json", ingredient);
 
       // using setState()
@@ -80,15 +109,19 @@ const Ingredients = () => {
       // ]);
 
       // using useReducer
-      dispatch({
+      dispatchIngredients({
         type: "ADD",
         ingredient: { id: response.data.name, ...ingredient },
       });
-      setisLoading(false);
+      dispatchHttp({ type: "RESPONSE" });
+
+      // setisLoading(false);
     } catch (error) {
       console.log("error adding ingredients", error);
-      setErrorMessage(error.message);
-      setisLoading(false);
+      dispatchHttp({ type: "ERROR", errorMessage: error.message });
+
+      // setErrorMessage(error.message);
+      // setisLoading(false);
     }
   };
 
@@ -99,7 +132,8 @@ const Ingredients = () => {
     // setIngredients(newIngredients);
 
     try {
-      setisLoading(true);
+      dispatchHttp({ type: "SEND" });
+      // setisLoading(true);
       await axios.delete(`ingredients/${id}.json`);
       // 2nd approach using setState()
       // setIngredients((prevIngredients) =>
@@ -107,13 +141,16 @@ const Ingredients = () => {
       // );
 
       // using useReducer()
-      dispatch({ type: "DELETE", ingredientId: id });
+      dispatchIngredients({ type: "REMOVE", ingredientId: id });
 
-      setisLoading(false);
+      dispatchHttp({ type: "RESPONSE" });
+      // setisLoading(false);
     } catch (error) {
       console.log("error deleting ingredient", error);
-      setErrorMessage(error.message);
-      setisLoading(false);
+
+      dispatchHttp({ type: "ERROR", errorMessage: error.message });
+      // setErrorMessage(error.message);
+      // setisLoading(false);
     }
   };
 
@@ -123,10 +160,10 @@ const Ingredients = () => {
     // setIngredients(filetredIngredients);
 
     // using useReducer()
-    dispatch({ type: "SET", ingredients: filetredIngredients });
+    dispatchIngredients({ type: "SET", ingredients: filetredIngredients });
   }, []);
 
-  const clearErrorMessageHandler = () => setErrorMessage(null);
+  const clearErrorMessageHandler = () => dispatchHttp(null);
 
   let ingredientsList = null;
 
@@ -142,14 +179,14 @@ const Ingredients = () => {
 
   return (
     <div className="App">
-      {errorMessage && (
+      {httpState.error && (
         <ErrorModal onClose={clearErrorMessageHandler}>
-          {errorMessage}
+          {httpState.error}
         </ErrorModal>
       )}
       <IngredientForm
         addIngredientsHandler={addIngredientsHandler}
-        loading={isLoading}
+        loading={httpState.isLoading}
       />
 
       <section style={{ textAlign: "center" }}>
