@@ -3,6 +3,7 @@ import React from "react";
 import "./ErrorModal.css";
 
 const ErrorModal = React.memo(({ onClose, children }) => {
+  console.log("RENDER ERROR MODAL ");
   return (
     <React.Fragment>
       <div className="backdrop" onClick={onClose} />

@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect, useCallback } from "react";
+import React, { useReducer, useEffect, useCallback, useMemo } from "react";
 
 import IngredientForm from "./IngredientForm/IngredientForm";
 import Search from "./Search/Search";
@@ -31,7 +31,7 @@ const httpReducer = (state, action) => {
     case "RESPONSE":
       return { ...state, isLoading: false };
     case "ERROR":
-      return { ...state, error: action.errorMessage };
+      return { isLoading: false, error: action.errorMessage };
     case "CLEAR":
       return { ...state, error: null };
     default:
@@ -96,7 +96,7 @@ const Ingredients = () => {
   // }, [ingredients]);
 
   // add igredients to database and on UI
-  const addIngredientsHandler = async (ingredient) => {
+  const addIngredientsHandler = useCallback(async (ingredient) => {
     try {
       dispatchHttp({ type: "SEND" });
       // setisLoading(true);
@@ -123,10 +123,10 @@ const Ingredients = () => {
       // setErrorMessage(error.message);
       // setisLoading(false);
     }
-  };
+  }, []);
 
   // remove ingredients from database and UI
-  const removeIngredientHandler = async (id) => {
+  const removeIngredientHandler = useCallback(async (id) => {
     // 1st approach using setState()
     // const newIngredients = [...ingredients].filter((ing) => ing.id !== id);
     // setIngredients(newIngredients);
@@ -152,7 +152,7 @@ const Ingredients = () => {
       // setErrorMessage(error.message);
       // setisLoading(false);
     }
-  };
+  }, []);
 
   // filter ingredients based on query
   const searchIngredientHandler = useCallback((filetredIngredients) => {
@@ -163,19 +163,24 @@ const Ingredients = () => {
     dispatchIngredients({ type: "SET", ingredients: filetredIngredients });
   }, []);
 
-  const clearErrorMessageHandler = () => dispatchHttp(null);
+  const clearErrorMessageHandler = useCallback(() => {
+    dispatchHttp({ type: "CLEAR" });
+  }, []);
 
-  let ingredientsList = null;
+  const ingredientListComponent = useMemo(() => {
+    let ingredientsList = null;
+    if (ingredients.length) {
+      ingredientsList = (
+        <IngredientList
+          ingredients={ingredients}
+          onRemoveItem={removeIngredientHandler}
+        />
+      );
+    }
+    return ingredientsList;
+  }, [ingredients, removeIngredientHandler]);
 
   // render ingredients only if there are ingredients
-  if (ingredients.length) {
-    ingredientsList = (
-      <IngredientList
-        ingredients={ingredients}
-        onRemoveItem={removeIngredientHandler}
-      />
-    );
-  }
 
   return (
     <div className="App">
@@ -192,7 +197,7 @@ const Ingredients = () => {
       <section style={{ textAlign: "center" }}>
         <Search onSearchIngredient={searchIngredientHandler} />
 
-        {ingredientsList || <p>Plase add new Ingredient.</p>}
+        {ingredientListComponent || <p>Plase add new Ingredient.</p>}
       </section>
     </div>
   );
