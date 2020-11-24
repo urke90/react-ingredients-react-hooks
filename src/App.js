@@ -6,7 +6,6 @@ import { AuthContext } from "./context/auth-context";
 
 const App = (props) => {
   const authContext = useContext(AuthContext);
-  console.log("authContext", authContext);
 
   let content = <Auth />;
 

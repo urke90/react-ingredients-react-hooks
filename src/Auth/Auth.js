@@ -6,7 +6,6 @@ import "./Auth.css";
 
 const Auth = (props) => {
   const authContext = useContext(AuthContext);
-  console.log("dasdas", authContext);
 
   const loginHandler = () => {
     authContext.login();
