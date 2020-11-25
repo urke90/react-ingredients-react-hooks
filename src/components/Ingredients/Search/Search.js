@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 import Card from "../../UI/Card/Card";
-import axios from "../../Api/ingredientApi";
+import axios from "../../../Api/ingredientApi";
 
 import "./Search.css";
 

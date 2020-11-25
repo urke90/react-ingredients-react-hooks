@@ -3,9 +3,10 @@ import React, { useReducer, useEffect, useCallback, useMemo } from "react";
 import IngredientForm from "./IngredientForm/IngredientForm";
 import Search from "./Search/Search";
 import IngredientList from "./IngredientList/IngredientList";
-import axios from "../Api/ingredientApi";
-import corsAxios from "../Api/corsIngredientsApi";
+import axios from "../../Api/ingredientApi";
+// import corsAxios from "../Api/corsIngredientsApi";
 import ErrorModal from "../UI/ErrorModal/ErrorModal";
+import useHttp from "../../hooks/http";
 
 // reducer for ADD/REMOVE/SET ingredients
 // defined outside Ingredints component since there is no need to re-render reducer
@@ -51,6 +52,11 @@ const Ingredients = () => {
     isLoading: false,
     error: null,
   });
+  const { isLoading, error, data, sendRequest } = useHttp();
+  console.log("1", isLoading);
+  console.log("2", error);
+  console.log("3", data);
+  console.log("4", sendRequest);
 
   // fetching init ingredients from database
   useEffect(() => {
@@ -100,7 +106,7 @@ const Ingredients = () => {
     try {
       dispatchHttp({ type: "SEND" });
       // setisLoading(true);
-      const response = await corsAxios.post("ingredients.json", ingredient);
+      const response = await axios.post("ingredients.json", ingredient);
 
       // using setState()
       // setIngredients((prevIngredients) => [
@@ -126,33 +132,15 @@ const Ingredients = () => {
   }, []);
 
   // remove ingredients from database and UI
-  const removeIngredientHandler = useCallback(async (id) => {
-    // 1st approach using setState()
-    // const newIngredients = [...ingredients].filter((ing) => ing.id !== id);
-    // setIngredients(newIngredients);
-
-    try {
-      dispatchHttp({ type: "SEND" });
-      // setisLoading(true);
-      await axios.delete(`ingredients/${id}.json`);
-      // 2nd approach using setState()
-      // setIngredients((prevIngredients) =>
-      //   prevIngredients.filter((ing) => ing.id !== id)
-      // );
-
-      // using useReducer()
-      dispatchIngredients({ type: "REMOVE", ingredientId: id });
-
-      dispatchHttp({ type: "RESPONSE" });
-      // setisLoading(false);
-    } catch (error) {
-      console.log("error deleting ingredient", error);
-
-      dispatchHttp({ type: "ERROR", errorMessage: error.message });
-      // setErrorMessage(error.message);
-      // setisLoading(false);
-    }
-  }, []);
+  const removeIngredientHandler = useCallback(
+    async (id) => {
+      // 1st approach using setState()
+      // const newIngredients = [...ingredients].filter((ing) => ing.id !== id);
+      // setIngredients(newIngredients);
+      sendRequest("DELETE", `ingredients/${id}.json`);
+    },
+    [sendRequest]
+  );
 
   // filter ingredients based on query
   const searchIngredientHandler = useCallback((filetredIngredients) => {
@@ -184,14 +172,12 @@ const Ingredients = () => {
 
   return (
     <div className="App">
-      {httpState.error && (
-        <ErrorModal onClose={clearErrorMessageHandler}>
-          {httpState.error}
-        </ErrorModal>
+      {error && (
+        <ErrorModal onClose={clearErrorMessageHandler}>{error}</ErrorModal>
       )}
       <IngredientForm
         addIngredientsHandler={addIngredientsHandler}
-        loading={httpState.isLoading}
+        loading={isLoading}
       />
 
       <section style={{ textAlign: "center" }}>
