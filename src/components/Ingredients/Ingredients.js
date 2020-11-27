@@ -48,15 +48,26 @@ const Ingredients = () => {
   // const [errorMessage, setErrorMessage] = useState();
 
   const [ingredients, dispatchIngredients] = useReducer(ingredientsReducer, []);
+  console.log("ingredients", ingredients);
   const [httpState, dispatchHttp] = useReducer(httpReducer, {
     isLoading: false,
     error: null,
   });
-  const { isLoading, error, data, sendRequest } = useHttp();
-  console.log("1", isLoading);
-  console.log("2", error);
-  console.log("3", data);
-  console.log("4", sendRequest);
+
+  const {
+    isLoading,
+    error,
+    responseData,
+    sendRequest,
+    extra,
+    identifier,
+  } = useHttp();
+
+  // console.log("isLoading", isLoading);
+  // console.log("error", error);
+  console.log("responseData", responseData);
+  console.log("identifier", identifier);
+  console.log("extra", extra);
 
   // fetching init ingredients from database
   useEffect(() => {
@@ -97,39 +108,52 @@ const Ingredients = () => {
     fetchInitIngredients();
   }, []);
 
-  // useEffect(() => {
-  //   console.log("RENDERING INGREDIENTS", ingredients);
-  // }, [ingredients]);
-
-  // add igredients to database and on UI
-  const addIngredientsHandler = useCallback(async (ingredient) => {
-    try {
-      dispatchHttp({ type: "SEND" });
-      // setisLoading(true);
-      const response = await axios.post("ingredients.json", ingredient);
-
-      // using setState()
-      // setIngredients((prevIngredients) => [
-      //   ...prevIngredients,
-      //   { id: response.data.name, ...ingredient },
-      // ]);
-
-      // using useReducer
+  useEffect(() => {
+    if (identifier === "REMOVE_INGREDIENT") {
+      dispatchIngredients({ type: "REMOVE", ingredientId: extra });
+    } else if (identifier === "ADD_INGREDIENT" && responseData && extra) {
       dispatchIngredients({
         type: "ADD",
-        ingredient: { id: response.data.name, ...ingredient },
+        ingredient: { id: responseData.name, ...extra },
       });
-      dispatchHttp({ type: "RESPONSE" });
-
-      // setisLoading(false);
-    } catch (error) {
-      console.log("error adding ingredients", error);
-      dispatchHttp({ type: "ERROR", errorMessage: error.message });
-
-      // setErrorMessage(error.message);
-      // setisLoading(false);
     }
-  }, []);
+  }, [extra, responseData]);
+
+  // add igredients to database and on UI
+  const addIngredientsHandler = useCallback(
+    async (ingredient) => {
+      // try {
+      //   dispatchHttp({ type: "SEND" });
+      //   // setisLoading(true);
+      //   const response = await axios.post("ingredients.json", ingredient);
+      //   // using setState()
+      //   // setIngredients((prevIngredients) => [
+      //   //   ...prevIngredients,
+      //   //   { id: response.data.name, ...ingredient },
+      //   // ]);
+      //   // using useReducer
+      //   dispatchIngredients({
+      //     type: "ADD",
+      //     ingredient: { id: response.data.name, ...ingredient },
+      //   });
+      //   dispatchHttp({ type: "RESPONSE" });
+      //   // setisLoading(false);
+      // } catch (error) {
+      //   console.log("error adding ingredients", error);
+      //   dispatchHttp({ type: "ERROR", errorMessage: error.message });
+      //   // setErrorMessage(error.message);
+      //   // setisLoading(false);
+      // }
+      sendRequest(
+        "POST",
+        "ingredients.json",
+        ingredient,
+        ingredient,
+        "ADD_INGREDIENT"
+      );
+    },
+    [sendRequest]
+  );
 
   // remove ingredients from database and UI
   const removeIngredientHandler = useCallback(
@@ -137,7 +161,13 @@ const Ingredients = () => {
       // 1st approach using setState()
       // const newIngredients = [...ingredients].filter((ing) => ing.id !== id);
       // setIngredients(newIngredients);
-      sendRequest("DELETE", `ingredients/${id}.json`);
+      sendRequest(
+        "DELETE",
+        `ingredients/${id}.json`,
+        null,
+        id,
+        "REMOVE_INGREDIENT"
+      );
     },
     [sendRequest]
   );
