@@ -9,9 +9,6 @@ import "./IngredientForm.css";
 // 2. use hooks inside root of the function ( can't use inside nested function or some if statements )
 // useState hooks == state ={}, for each input create separate hooks
 const IngredientForm = React.memo(({ addIngredientsHandler, loading }) => {
-  // useState always returns 2 elements
-  // 1. arr[0] === value we assign ine useState()
-  // 2. arr[1] === function to update the state
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
 

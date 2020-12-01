@@ -3,7 +3,6 @@ import React from "react";
 import "./IngredientList.css";
 
 const IngredientList = ({ ingredients, onRemoveItem }) => {
-  console.log("RENDER INGRDIENT LIST");
   return (
     <section className="ingredient-list">
       <h2>Loaded Ingredients</h2>

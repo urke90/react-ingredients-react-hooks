@@ -1,40 +1,36 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import Card from "../../UI/Card/Card";
-import axios from "../../../Api/ingredientApi";
+import useHttp from "../../../hooks/http";
+import ErrorModal from "../../UI/ErrorModal/ErrorModal";
+import { transformIngredients } from "../../../utils/utils";
 
 import "./Search.css";
 
 const Search = React.memo(({ onSearchIngredient }) => {
   const [searchValue, setSearchValue] = useState("");
 
+  const { error, responseData, sendRequest, clearErrorHandler } = useHttp();
+
+  useEffect(() => {
+    const transformedIngredients = transformIngredients(responseData);
+    onSearchIngredient(transformedIngredients);
+  }, [responseData, onSearchIngredient]);
+
   // get ingredient by title from database when user submits form
   const searchIngreientHandler = async (event) => {
     event.preventDefault();
-    try {
-      const query = searchValue.length
-        ? `?orderBy="title"&equalTo="${searchValue}"`
-        : "";
-      const response = await axios.get(`/ingredients.json${query}`);
-      const ingredientsData = response.data;
-      const transformedIngredients = [];
 
-      for (let key in ingredientsData) {
-        transformedIngredients.push({
-          id: key,
-          amount: ingredientsData[key]["amount"],
-          title: ingredientsData[key]["title"],
-        });
-      }
+    const query = searchValue.length
+      ? `?orderBy="title"&equalTo="${searchValue}"`
+      : "";
 
-      onSearchIngredient(transformedIngredients);
-    } catch (error) {
-      console.log("error", error);
-    }
+    sendRequest("GET", `/ingredients.json${query}`);
   };
 
   return (
     <section className="search">
+      {error && <ErrorModal onClose={clearErrorHandler}>{error}</ErrorModal>}
       <Card>
         <div className="search-input">
           <label>Filter by Title</label>
@@ -42,6 +38,7 @@ const Search = React.memo(({ onSearchIngredient }) => {
             <input
               name="ingredients_search"
               type="text"
+              value={searchValue}
               onChange={(event) => setSearchValue(event.target.value)}
             />
             <button>Search</button>

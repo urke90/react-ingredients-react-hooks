@@ -3,8 +3,7 @@ import React, { useReducer, useEffect, useCallback, useMemo } from "react";
 import IngredientForm from "./IngredientForm/IngredientForm";
 import Search from "./Search/Search";
 import IngredientList from "./IngredientList/IngredientList";
-import axios from "../../Api/ingredientApi";
-// import corsAxios from "../Api/corsIngredientsApi";
+import { transformIngredients } from "../../utils/utils";
 import ErrorModal from "../UI/ErrorModal/ErrorModal";
 import useHttp from "../../hooks/http";
 
@@ -25,34 +24,9 @@ const ingredientsReducer = (state, action) => {
   }
 };
 
-const httpReducer = (state, action) => {
-  switch (action.type) {
-    case "SEND":
-      return { ...state, isLoading: true };
-    case "RESPONSE":
-      return { ...state, isLoading: false };
-    case "ERROR":
-      return { isLoading: false, error: action.errorMessage };
-    case "CLEAR":
-      return { ...state, error: null };
-    default:
-      return state;
-  }
-};
-
 // manage ingredients with useState()
 const Ingredients = () => {
-  // approach with setState()
-  // const [ingredients, setIngredients] = useState([]);
-  // const [isLoading, setisLoading] = useState(false);
-  // const [errorMessage, setErrorMessage] = useState();
-
   const [ingredients, dispatchIngredients] = useReducer(ingredientsReducer, []);
-  console.log("ingredients", ingredients);
-  const [httpState, dispatchHttp] = useReducer(httpReducer, {
-    isLoading: false,
-    error: null,
-  });
 
   const {
     isLoading,
@@ -61,48 +35,14 @@ const Ingredients = () => {
     sendRequest,
     extra,
     identifier,
+    clearErrorHandler,
   } = useHttp();
 
-  // console.log("isLoading", isLoading);
-  // console.log("error", error);
-  console.log("responseData", responseData);
-  console.log("identifier", identifier);
-  console.log("extra", extra);
-
   // fetching init ingredients from database
+  // TODO figure out how to get ingredients from firebase immediatelly
   useEffect(() => {
     const fetchInitIngredients = async () => {
-      try {
-        dispatchHttp({ type: "SEND" });
-        // setisLoading(true);
-        const response = await axios.get(`/ingredients.json`);
-        const ingredientsData = response.data;
-        const transformedIngredients = [];
-
-        for (let key in ingredientsData) {
-          transformedIngredients.push({
-            id: key,
-            title: ingredientsData[key]["title"],
-            amount: ingredientsData[key]["amount"],
-          });
-        }
-        // using setState()
-        // setIngredients(transformedIngredients);
-
-        dispatchIngredients({
-          type: "SET",
-          ingredients: transformedIngredients,
-        });
-
-        dispatchHttp({ type: "RESPONSE" });
-        // setisLoading(false);
-      } catch (error) {
-        console.log("error", error.message);
-
-        dispatchHttp({ type: "ERROR", errorMessage: error.message });
-        // setErrorMessage(error.message);
-        // setisLoading(false);
-      }
+      sendRequest("GET", "ingredients.json", null, null, "SET_INGREDIENTS");
     };
 
     fetchInitIngredients();
@@ -116,34 +56,18 @@ const Ingredients = () => {
         type: "ADD",
         ingredient: { id: responseData.name, ...extra },
       });
+    } else if (identifier === "SET_INGREDIENTS" && responseData) {
+      dispatchIngredients({
+        type: "SET",
+        ingredients: transformIngredients(responseData),
+      });
     }
-  }, [extra, responseData]);
+  }, [extra, responseData, identifier, isLoading]);
 
   // add igredients to database and on UI
   const addIngredientsHandler = useCallback(
     async (ingredient) => {
-      // try {
-      //   dispatchHttp({ type: "SEND" });
-      //   // setisLoading(true);
-      //   const response = await axios.post("ingredients.json", ingredient);
-      //   // using setState()
-      //   // setIngredients((prevIngredients) => [
-      //   //   ...prevIngredients,
-      //   //   { id: response.data.name, ...ingredient },
-      //   // ]);
-      //   // using useReducer
-      //   dispatchIngredients({
-      //     type: "ADD",
-      //     ingredient: { id: response.data.name, ...ingredient },
-      //   });
-      //   dispatchHttp({ type: "RESPONSE" });
-      //   // setisLoading(false);
-      // } catch (error) {
-      //   console.log("error adding ingredients", error);
-      //   dispatchHttp({ type: "ERROR", errorMessage: error.message });
-      //   // setErrorMessage(error.message);
-      //   // setisLoading(false);
-      // }
+      console.log("ingredient in addIngredientsHandler", ingredient);
       sendRequest(
         "POST",
         "ingredients.json",
@@ -181,10 +105,7 @@ const Ingredients = () => {
     dispatchIngredients({ type: "SET", ingredients: filetredIngredients });
   }, []);
 
-  const clearErrorMessageHandler = useCallback(() => {
-    dispatchHttp({ type: "CLEAR" });
-  }, []);
-
+  // Just an example for useMemo ===> better to use React.memo in component itself
   const ingredientListComponent = useMemo(() => {
     let ingredientsList = null;
     if (ingredients.length) {
@@ -198,13 +119,9 @@ const Ingredients = () => {
     return ingredientsList;
   }, [ingredients, removeIngredientHandler]);
 
-  // render ingredients only if there are ingredients
-
   return (
     <div className="App">
-      {error && (
-        <ErrorModal onClose={clearErrorMessageHandler}>{error}</ErrorModal>
-      )}
+      {error && <ErrorModal onClose={clearErrorHandler}>{error}</ErrorModal>}
       <IngredientForm
         addIngredientsHandler={addIngredientsHandler}
         loading={isLoading}
