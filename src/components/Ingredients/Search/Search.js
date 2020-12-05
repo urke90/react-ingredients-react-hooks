@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import Card from "../../UI/Card/Card";
 import useHttp from "../../../hooks/http";
@@ -20,6 +20,7 @@ const Search = React.memo(({ onSearchIngredient }) => {
   // get ingredient by title from database when user submits form
   const searchIngreientHandler = async (event) => {
     event.preventDefault();
+    console.log("searchIngreientHandler SEARCH");
 
     const query = searchValue.length
       ? `?orderBy="title"&equalTo="${searchValue}"`
