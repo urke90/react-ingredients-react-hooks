@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export const useAddIngredient = (initValue = "") => {
+export const useChangeStateValue = (initValue = "") => {
   const [value, setValue] = useState(initValue);
 
   const changeValueHandler = (e) => {

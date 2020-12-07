@@ -1,5 +1,5 @@
 import React from "react";
-import { useAddIngredient } from "../../../hooks/useIngedientAdd";
+import { useChangeStateValue } from "../../../hooks/useChangeStateValue";
 import Card from "../../UI/Card/Card";
 import Loader from "../../UI/Loader/Loader";
 import "./IngredientForm.css";
@@ -8,8 +8,8 @@ import "./IngredientForm.css";
 // 2. use hooks inside root of the function ( can't use inside nested function or some if statements )
 const IngredientForm = React.memo(({ addIngredientsHandler, loading }) => {
   // returns value and function to update Value of input element
-  const title = useAddIngredient("");
-  const amount = useAddIngredient("");
+  const title = useChangeStateValue("");
+  const amount = useChangeStateValue("");
 
   const submitHandler = (event) => {
     event.preventDefault();

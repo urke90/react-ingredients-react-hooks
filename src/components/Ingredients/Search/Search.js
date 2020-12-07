@@ -4,11 +4,12 @@ import Card from "../../UI/Card/Card";
 import useHttp from "../../../hooks/http";
 import ErrorModal from "../../UI/ErrorModal/ErrorModal";
 import { transformIngredients } from "../../../utils/utils";
+import { useChangeStateValue } from "../../../hooks/useChangeStateValue";
 
 import "./Search.css";
 
 const Search = React.memo(({ onSearchIngredient }) => {
-  const [searchValue, setSearchValue] = useState("");
+  const search = useChangeStateValue("");
 
   const { error, responseData, sendRequest, clearErrorHandler } = useHttp();
 
@@ -22,8 +23,8 @@ const Search = React.memo(({ onSearchIngredient }) => {
     event.preventDefault();
     console.log("searchIngreientHandler SEARCH");
 
-    const query = searchValue.length
-      ? `?orderBy="title"&equalTo="${searchValue}"`
+    const query = search.value.length
+      ? `?orderBy="title"&equalTo="${search.value}"`
       : "";
 
     sendRequest("GET", `/ingredients.json${query}`);
@@ -36,12 +37,7 @@ const Search = React.memo(({ onSearchIngredient }) => {
         <div className="search-input">
           <label>Filter by Title</label>
           <form onSubmit={searchIngreientHandler}>
-            <input
-              name="ingredients_search"
-              type="text"
-              value={searchValue}
-              onChange={(event) => setSearchValue(event.target.value)}
-            />
+            <input name="ingredients_search" type="text" {...search} />
             <button>Search</button>
           </form>
         </div>

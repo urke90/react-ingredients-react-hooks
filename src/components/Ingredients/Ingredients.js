@@ -6,24 +6,12 @@ import IngredientList from "./IngredientList/IngredientList";
 import { transformIngredients } from "../../utils/utils";
 import ErrorModal from "../UI/ErrorModal/ErrorModal";
 import useHttp from "../../hooks/http";
-
-// reducer for ADD/REMOVE/SET ingredients
-// defined outside Ingredints component since there is no need to re-render reducer
-const ingredientsReducer = (state, action) => {
-  switch (action.type) {
-    case "SET":
-      return action.ingredients;
-    case "ADD":
-      return [...state, action.ingredient];
-    case "REMOVE":
-      return state.filter(
-        (ingredient) => ingredient.id !== action.ingredientId
-      );
-    default:
-      return state;
-  }
-};
-
+import {
+  ingredientsReducer,
+  SET,
+  ADD,
+  REMOVE,
+} from "../../reducers/ingredientsReducer";
 // manage ingredients with useState()
 const Ingredients = () => {
   const [ingredients, dispatchIngredients] = useReducer(ingredientsReducer, []);
@@ -41,24 +29,20 @@ const Ingredients = () => {
   // fetching init ingredients from database
   // TODO figure out how to get ingredients from firebase immediatelly
   useEffect(() => {
-    const fetchInitIngredients = async () => {
-      sendRequest("GET", "ingredients.json", null, null, "SET_INGREDIENTS");
-    };
-
-    fetchInitIngredients();
+    sendRequest("GET", "ingredients.json", null, null, "SET_INGREDIENTS");
   }, []);
 
   useEffect(() => {
     if (identifier === "REMOVE_INGREDIENT") {
-      dispatchIngredients({ type: "REMOVE", ingredientId: extra });
+      dispatchIngredients({ type: REMOVE, ingredientId: extra });
     } else if (identifier === "ADD_INGREDIENT" && responseData && extra) {
       dispatchIngredients({
-        type: "ADD",
+        type: ADD,
         ingredient: { id: responseData.name, ...extra },
       });
     } else if (identifier === "SET_INGREDIENTS" && responseData) {
       dispatchIngredients({
-        type: "SET",
+        type: SET,
         ingredients: transformIngredients(responseData),
       });
     }
