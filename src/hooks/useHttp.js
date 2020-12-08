@@ -3,7 +3,7 @@ import axios from "../Api/ingredientApi";
 import { httpReducer, initState } from "../reducers/httpReducer";
 
 // custom hook that holds logic for sending request, and sharing data
-const useHttp = () => {
+export const useHttp = () => {
   const [httpState, dispatchHttp] = useReducer(httpReducer, initState);
 
   const { isLoading, error, responseData, extra, identifier } = httpState;
@@ -51,5 +51,3 @@ const useHttp = () => {
     clearErrorHandler,
   };
 };
-
-export default useHttp;

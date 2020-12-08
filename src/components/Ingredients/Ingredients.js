@@ -5,90 +5,19 @@ import Search from "./Search/Search";
 import IngredientList from "./IngredientList/IngredientList";
 import { transformIngredients } from "../../utils/utils";
 import ErrorModal from "../UI/ErrorModal/ErrorModal";
-import useHttp from "../../hooks/http";
-import {
-  ingredientsReducer,
-  SET,
-  ADD,
-  REMOVE,
-} from "../../reducers/ingredientsReducer";
+import { useIngredientsHandler } from "../../hooks/useIngredientsHandler";
+
 // manage ingredients with useState()
 const Ingredients = () => {
-  const [ingredients, dispatchIngredients] = useReducer(ingredientsReducer, []);
-
   const {
+    ingredients,
     isLoading,
     error,
-    responseData,
-    sendRequest,
-    extra,
-    identifier,
     clearErrorHandler,
-  } = useHttp();
-
-  // fetching init ingredients from database
-  // TODO figure out how to get ingredients from firebase immediatelly
-  useEffect(() => {
-    sendRequest("GET", "ingredients.json", null, null, "SET_INGREDIENTS");
-  }, []);
-
-  useEffect(() => {
-    if (identifier === "REMOVE_INGREDIENT") {
-      dispatchIngredients({ type: REMOVE, ingredientId: extra });
-    } else if (identifier === "ADD_INGREDIENT" && responseData && extra) {
-      dispatchIngredients({
-        type: ADD,
-        ingredient: { id: responseData.name, ...extra },
-      });
-    } else if (identifier === "SET_INGREDIENTS" && responseData) {
-      dispatchIngredients({
-        type: SET,
-        ingredients: transformIngredients(responseData),
-      });
-    }
-  }, [extra, responseData, identifier, isLoading]);
-
-  // add igredients to database and on UI
-  const addIngredientsHandler = useCallback(
-    async (ingredient) => {
-      console.log("ingredient in addIngredientsHandler", ingredient);
-      sendRequest(
-        "POST",
-        "ingredients.json",
-        ingredient,
-        ingredient,
-        "ADD_INGREDIENT"
-      );
-    },
-    [sendRequest]
-  );
-
-  // remove ingredients from database and UI
-  const removeIngredientHandler = useCallback(
-    async (id) => {
-      // 1st approach using setState()
-      // const newIngredients = [...ingredients].filter((ing) => ing.id !== id);
-      // setIngredients(newIngredients);
-      sendRequest(
-        "DELETE",
-        `ingredients/${id}.json`,
-        null,
-        id,
-        "REMOVE_INGREDIENT"
-      );
-    },
-    [sendRequest]
-  );
-
-  // filter ingredients based on query
-  const searchIngredientHandler = useCallback((filetredIngredients) => {
-    // using setState()
-    // setIngredients(filetredIngredients);
-
-    // using useReducer()
-    dispatchIngredients({ type: "SET", ingredients: filetredIngredients });
-  }, []);
-
+    addIngredientsHandler,
+    removeIngredientHandler,
+    searchIngredientHandler,
+  } = useIngredientsHandler();
   // Just an example for useMemo ===> better to use React.memo in component itself
   const ingredientListComponent = useMemo(() => {
     let ingredientsList = null;

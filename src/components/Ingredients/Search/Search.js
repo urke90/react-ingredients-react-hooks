@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 
 import Card from "../../UI/Card/Card";
-import useHttp from "../../../hooks/http";
+import { useHttp } from "../../../hooks/useHttp";
 import ErrorModal from "../../UI/ErrorModal/ErrorModal";
 import { transformIngredients } from "../../../utils/utils";
 import { useChangeStateValue } from "../../../hooks/useChangeStateValue";
